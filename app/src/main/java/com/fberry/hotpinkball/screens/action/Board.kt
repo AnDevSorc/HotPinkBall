@@ -1,4 +1,4 @@
-package com.fberry.hotpinkball.action
+package com.fberry.hotpinkball.screens.action
 
 class Board(val width: Int, val height: Int) {
     val pins = listOf(
@@ -33,6 +33,14 @@ class Board(val width: Int, val height: Int) {
         Point(10, 14),
         Point(12, 14)
     )
+
+    fun isPinAt(i: Int, j: Int): Boolean {
+        return pins.any { it.x == j && it.y == i }
+    }
+
+    fun isBasketAt(i: Int, j: Int): Boolean {
+        return baskets.any { it.x == j && it.y == i }
+    }
 
     fun getNextMove(current: Point): Point {
         if (pins.contains(Point(current.x, current.y + 1))) {

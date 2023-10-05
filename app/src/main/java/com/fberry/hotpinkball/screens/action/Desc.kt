@@ -1,4 +1,4 @@
-package com.fberry.hotpinkball.action
+package com.fberry.hotpinkball.screens.action
 
 import android.content.Context
 import android.util.AttributeSet
@@ -6,44 +6,62 @@ import android.widget.GridLayout
 import android.widget.ImageView
 import com.fberry.hotpinkball.R
 
-class ActionBoxImageView(context: Context, attrs: AttributeSet) : GridLayout(context, attrs) {
+class Desc(context: Context, attrs: AttributeSet) : GridLayout(context, attrs) {
 
     private val board = Board(15, 13)
-    private var ballImage: ImageView
+    private lateinit var ballImage: ImageView
 
     var onBallInBasketListener: ((basketIndex: Int) -> Unit)? = null
 
     init {
+        setupGrid()
+        setupBallImage()
+    }
+
+    private fun setupGrid() {
         rowCount = 15
         columnCount = 13
 
         for (i in 0 until rowCount) {
             for (j in 0 until columnCount) {
-                val imageView = ImageView(context)
-                if (board.pins.any { it.x == j && it.y == i }) {
-                    imageView.setImageResource(R.drawable.obstacle)
-                } else if (board.baskets.any { it.x == j && it.y == i }) {
-                    when (j) {
-                        0, 12 -> imageView.setImageResource(R.drawable.basket3)
-                        2, 10 -> imageView.setImageResource(R.drawable.basket2)
-                        6 -> imageView.setImageResource(R.drawable.basket0)
-                        else -> imageView.setImageResource(R.drawable.basket1)
-                    }
-                } else {
-                    imageView.setImageResource(android.R.color.transparent)
-                }
-
-                val params = LayoutParams()
-                params.width = 0
-                params.height = 0
-                params.rowSpec = spec(i, 1f)
-                params.columnSpec = spec(j, 1f)
-                imageView.layoutParams = params
-
+                val imageView = createGridElementImageView(i, j)
                 addView(imageView)
             }
         }
+    }
 
+    private fun createGridElementImageView(i: Int, j: Int): ImageView {
+        val imageView = ImageView(context)
+        imageView.setImageResource(getGridElementResource(i, j))
+
+        val params = LayoutParams()
+        params.width = 0
+        params.height = 0
+        params.rowSpec = spec(i, 1f)
+        params.columnSpec = spec(j, 1f)
+        imageView.layoutParams = params
+
+        return imageView
+    }
+
+    private fun getGridElementResource(i: Int, j: Int): Int {
+        return when {
+            board.isPinAt(i, j) -> R.drawable.obstacle
+            board.isBasketAt(i, j) -> getBasketResource(j)
+            else -> android.R.color.transparent
+        }
+    }
+
+    private fun getBasketResource(j: Int): Int {
+        return when (j) {
+            0, 12 -> R.drawable.basket3
+            2, 10 -> R.drawable.basket2
+            6 -> R.drawable.basket0
+            else -> R.drawable.basket1
+        }
+    }
+
+    private fun setupBallImage() {
         ballImage = ImageView(context).apply {
             setImageResource(R.drawable.ball)
         }
@@ -55,6 +73,7 @@ class ActionBoxImageView(context: Context, attrs: AttributeSet) : GridLayout(con
         ballImage.layoutParams = ballParams
         addView(ballImage)
     }
+
 
     fun moveBall() {
         val currentPos = Point(
